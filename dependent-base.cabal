@@ -1,0 +1,76 @@
+cabal-version: 3.0
+name: dependent-base
+version: 0.1.0.0
+synopsis: Standard library for Dependent Haskell
+description:
+  Certified runtime operations, indexed containers, dependent function
+  combinators, propositional equality, constructive decidability, and algebraic
+  proof properties for Dependent Haskell. Modules reuse GHC @base@ runtime
+  datatypes directly without wrapper allocation or data copying, following the
+  design of @linear-base@.
+
+homepage: https://github.com/TharkunAB/dependent-base
+bug-reports: https://github.com/TharkunAB/dependent-base/issues
+license: BSD-3-Clause
+license-file: LICENSE
+author: Matthias Pall Gissurarson
+maintainer: mpg@mpg.is
+copyright: 2026 Tharkun AB and Matthias Pall Gissurarson
+category: Data, Dependent Types
+build-type: Simple
+extra-doc-files:
+  CHANGELOG.md
+  README.md
+
+source-repository head
+  type: git
+  location: https://github.com/TharkunAB/dependent-base.git
+
+library
+  exposed-modules:
+    Data.Bool.Dependent
+    Data.Decision
+    Data.Either.Dependent
+    Data.Exists.Dependent
+    Data.Fin.Dependent
+    Data.Function.Dependent
+    Data.List.Dependent
+    Data.List.Dependent.All
+    Data.List.Dependent.Properties
+    Data.Maybe.Dependent
+    Data.Nat.Dependent
+    Data.Nat.Dependent.Properties
+    Data.Sigma.Dependent
+    Data.Tuple.Dependent
+    Data.Type.Equality.Dependent
+    Data.Vec.Dependent
+    Data.Vec.Dependent.Properties
+    Prelude.Dependent
+
+  other-modules:
+    Data.Either.Dependent.Internal
+    Data.Maybe.Dependent.Internal
+    Data.Nat.Dependent.Internal
+    Data.Tuple.Dependent.Internal
+
+  hs-source-dirs: src
+  default-language: GHC2024
+  ghc-options: -Wall
+  build-depends:
+    base >=4.23 && <5,
+    ghc-experimental >=10.100 && <10.101,
+    ghc-internal >=10.100 && <10.101,
+
+test-suite dependent-base-laws
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+    DependentClient
+    OrdinaryInteropClient
+
+  hs-source-dirs: test
+  default-language: GHC2024
+  ghc-options: -Wall
+  build-depends:
+    base >=4.23 && <5,
+    dependent-base,
