@@ -73,6 +73,8 @@ module Prelude.Dependent
   , LE (..)
   , LTNat
   , Fin (..)
+  , KnownFin (..)
+  , fin
   , finToNat
   , finToInt
   , mkFin
@@ -185,7 +187,9 @@ import Data.Exists.Dependent
   )
 import Data.Fin.Dependent
   ( Fin (..)
+  , KnownFin (..)
   , absurdFinZero
+  , fin
   , finToInt
   , finToNat
   , mkFin

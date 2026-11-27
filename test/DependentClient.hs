@@ -3,6 +3,7 @@
 {-# LANGUAGE DependentTypes #-}
 {-# LANGUAGE ExplicitNamespaces #-}
 {-# LANGUAGE ListTuplePuns #-}
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# OPTIONS_GHC -Wno-missing-signatures -fno-enable-rewrite-rules #-}
 
@@ -138,6 +139,26 @@ type VecAt a = \n -> Vec a n
 checkZerosLen :: foreach (n :: Nat) -> Vec Nat n -> plus n Zero :~: n
 checkZerosLen n _ = NP.plusZero n
 
+-- 2b. Compile-time bounds-checked Fin numerals (fin, OverloadedLabels, FromNatural)
+
+finZeroOpen :: forall (n :: Nat). Fin (Succ n)
+finZeroOpen = fin 0
+
+finOneOpen :: forall (n :: Nat). Fin (Succ (Succ n))
+finOneOpen = fin 1
+
+finPlusOpen :: forall (n :: Nat). Fin (plus 2 n)
+finPlusOpen = fin 1
+
+labelZeroOpen :: forall (n :: Nat). Fin (Succ n)
+labelZeroOpen = #0
+
+labelOneOpen :: forall (n :: Nat). Fin (Succ (Succ n))
+labelOneOpen = #1
+
+finToNatStepProof :: foreach (i :: Fin 3) -> F.finToNat ('FS i) :~: Succ (F.finToNat i)
+finToNatStepProof _ = Refl
+
 -- 3. Runtime verification of all dependent-base modules
 checkDependentSuite :: Bool
 checkDependentSuite =
@@ -242,11 +263,29 @@ checkDependentSuite =
      && F.finToInt (F.oppositeFin 3 fz3) == 2
      && F.finToInt (F.oppositeFin 3 (FS (FS FZ) :: Fin 3)) == 0
      && F.finToInt (F.shiftFin two (FZ :: Fin 3)) == 2
+     && finZeroOpen @Zero == FZ
+     && finOneOpen @Zero == FS FZ
+     && finPlusOpen @Zero == FS FZ
+     && labelZeroOpen @Zero == FZ
+     && labelOneOpen @Zero == FS FZ
+     && F.finToNat (fin 2 :: Fin 3) == two
+     && F.finToNat (#2 :: Fin 3) == two
+     && (case finToNatStepProof fz3 of Refl -> True)
+     && (let combined :: Vec String 3
+             combined = VCons "alpha" (VCons "beta" (VCons "gamma" VNil))
+         in lookupVec (fin 0) combined == "alpha"
+            && lookupVec (fin 1) combined == "beta"
+            && lookupVec (fin 2) combined == "gamma"
+            && lookupVec #0 combined == "alpha"
+            && lookupVec #1 combined == "beta"
+            && lookupVec #2 combined == "gamma")
      && toListVec (V.snocVec v12 Zero) == [two, three, Zero]
      && toListVec (V.initVec v12) == [two]
      && V.lastVec v12 == three
      && toListVec (V.reverseVec v12) == [three, two]
      && toListVec (V.updateAtVec (FS FZ) Succ v12) == [two, Succ three]
+     && toListVec (V.updateAtVec (fin 1) Succ v12) == [two, Succ three]
+     && toListVec (V.updateAtVec #1 Succ v12) == [two, Succ three]
      && (case (VP.vconsCong two (Refl :: 'VNil :~: ('VNil :: Vec Nat Zero)), VP.appendVecNilL v12, VP.appendVecCons two v12 v12) of
            (Refl, Refl, Refl) -> True)
      && (case VP.splitAtAppendVec @Nat @(Succ Zero) (Succ Zero) v12 of Pair l (Pair r Refl) -> toListVec l == [two] && toListVec r == [three])
